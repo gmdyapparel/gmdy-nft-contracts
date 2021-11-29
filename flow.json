@@ -1,0 +1,41 @@
+{
+	"emulators": {
+		"default": {
+			"port": 3569,
+			"serviceAccount": "emulator-account"
+		}
+	},
+	"contracts": {
+		"gmdyContract": "./contracts/gmdyContract.cdc",
+		"FungibleToken": "./contracts/FungibleToken.cdc",
+		"MarketPlace": "./contracts/MarketPlace.cdc"
+	},
+	"networks": {
+		"emulator": "127.0.0.1:3569",
+		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"testnet": "access.devnet.nodes.onflow.org:9000"
+	},
+	"accounts": {
+		"emulator-account": {
+			"address": "f8d6e0586b0a20c7",
+			"key": "07aa1666bd90d2b71f010bad15ec2ec0f31d3b29a77e976388d56eee3556c489"
+		},
+		"testnet-account":{
+			"address": "0x0ecca3de3c54821a",
+			"key": "89d5eda2cadeb546c7c5c147ddb7621a4984efe36d3f47297a00aa85897663e7"
+		},
+		"second-testnet-account": {
+			"address": "0xc2f030dfaeb9a10b",
+			"key": "8c813bdf34bee2767bdca781c26620cdbad22b55ff0ec8a3e6a1bcd5725d7648"
+		}
+	},
+	"deployments": {
+		"testnet": {
+			"testnet-account": [
+				"gmdyContract",
+				"FungibleToken",
+				"MarketPlace"
+			]
+		}
+	}
+}
