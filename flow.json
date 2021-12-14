@@ -6,9 +6,9 @@
 		}
 	},
 	"contracts": {
-		"gmdyContract": "./contracts/gmdyContract.cdc",
-		"FungibleToken": "./contracts/FungibleToken.cdc",
-		"MarketPlace": "./contracts/MarketPlace.cdc"
+		"GMDYFungibleToken" : "./contracts/GMDYFungibleToken.cdc",
+		"GMDYNFTContract" : "./contracts/GMDYNFTContract.cdc",
+		"GMDYMarketPlace": "./contracts/GMDYMarketPlace.cdc"
 	},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
@@ -18,23 +18,23 @@
 	"accounts": {
 		"emulator-account": {
 			"address": "f8d6e0586b0a20c7",
-			"key": "07aa1666bd90d2b71f010bad15ec2ec0f31d3b29a77e976388d56eee3556c489"
+			"key": "de2b8dc28e07d5c031e038431bdee1a10d5e745c71f505175972caf1e959ba63"
 		},
-		"testnet-account":{
-			"address": "0x0ecca3de3c54821a",
-			"key": "89d5eda2cadeb546c7c5c147ddb7621a4984efe36d3f47297a00aa85897663e7"
+		"gmdy-testnet": {
+			"address": "0x3b21b794c7c9fa3b",
+			"key": "0da463d4310f622d7ca822bd8e4f245d0a294cc4cae8d5bee319712c536e8742"
 		},
-		"second-testnet-account": {
-			"address": "0xc2f030dfaeb9a10b",
-			"key": "8c813bdf34bee2767bdca781c26620cdbad22b55ff0ec8a3e6a1bcd5725d7648"
+		"buyer-testnet": {
+			"address": "0xf59da406edc00843",
+			"key": "13628a4c960e0bc30b9fc7c4b3ebfa582057f591d3a84bac18cc6c4a21a1e7bb"
 		}
 	},
 	"deployments": {
 		"testnet": {
-			"testnet-account": [
-				"gmdyContract",
-				"FungibleToken",
-				"MarketPlace"
+			"gmdy-testnet": [
+				"GMDYFungibleToken",
+				"GMDYNFTContract",
+				"GMDYMarketPlace"
 			]
 		}
 	}
