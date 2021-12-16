@@ -1,5 +1,5 @@
-import GMDYNFTContract from 0x3b21b794c7c9fa3b
-import GMDYFungibleToken from 0x3b21b794c7c9fa3b
+import GMDYNFTContract from 0xe8e38458359e5712
+import GMDYFungibleToken from 0xe8e38458359e5712
 
 
 pub contract GMDYMarketPlace {

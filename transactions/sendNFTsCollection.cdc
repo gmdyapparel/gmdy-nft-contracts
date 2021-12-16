@@ -1,4 +1,4 @@
-import GMDYNFTContract from 0x3b21b794c7c9fa3b
+import GMDYNFTContract from 0xe8e38458359e5712
 
 transaction {
 
@@ -17,8 +17,8 @@ transaction {
     let name = "Neymar Jr"
     let currentId = 1 as UInt64
     let collectionType = "common"
-    let amountToCreate = 7  as UInt64
-    let maximum = 100  as UInt64
+    let amountToCreate = 10  as UInt64
+    let maximum = 20  as UInt64
     let metadataNFT : {String : String} = {
         "name": "Neymar Jr",
         "description": "From Brasil", 

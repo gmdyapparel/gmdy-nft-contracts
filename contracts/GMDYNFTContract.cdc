@@ -1,5 +1,8 @@
 pub contract GMDYNFTContract {
 
+// event that is emitted when a new collection is created
+pub event newCollection(collectionId: UInt64, collectionName: String)
+
 /* This is the contract where we manage the flow of our collections and NFts*/
 
 /* 
@@ -142,8 +145,9 @@ Through the contract you can find variables such as Metadata,
     // to add the first NFTs to an empty collection.
     // They would use this just to expose the amount available to create.
     // to add NFT to available spaces.
+    //// They would use this to only expose getIDs
     // to get the Ids of the existing collections.
-    //to get Metadata NFt
+    // They would use this just to expose the ids of the nfts getIdsNFT()
     //// To get how many collections exist.
     pub resource interface CollectionsReceiver {
         pub fun createCollection(name: String, metadata: {String: AnyStruct}): UInt64
@@ -154,13 +158,13 @@ Through the contract you can find variables such as Metadata,
         pub fun withdraw(collectionId: UInt64, withdrawID: UInt64): @NFT
         pub fun getCollectionRef(collectionId: UInt64): &Collection
         pub fun getMetadataNft(collectionId: UInt64, tokenId: UInt64): {String:AnyStruct}
+        pub fun getIdsNFT(collectionId: UInt64) : [UInt64]
     }
 
     pub resource Collections: CollectionsReceiver {
 
         pub var idCountNFT: UInt64
         pub var idCountCollections : UInt64
-      //  pub var priveteKey: Address
         pub var idCountNFTCollections : UInt64
         pub let collections : @{UInt64: Collection}
         pub let nftCollections : @{UInt64: NFTCollection}
@@ -177,6 +181,8 @@ Through the contract you can find variables such as Metadata,
             let id = self.idCountCollections + 1 as UInt64
             self.collections[id] <-! create Collection(name: name, metadata: metadata)
             self.idCountCollections = id
+
+            emit newCollection(collectionId: id, collectionName: name)
             return id
         }
 
@@ -209,6 +215,12 @@ Through the contract you can find variables such as Metadata,
             return token.metadata
         }
 
+        pub fun getIdsNFT(collectionId: UInt64) : [UInt64] {
+        let collection = &self.collections[collectionId]  as! &Collection
+            let ids = collection.getIDs();
+            return ids
+        }
+
         pub fun  getIdsCollection(): [UInt64] {
             return self.collections.keys
         }
@@ -224,6 +236,7 @@ Through the contract you can find variables such as Metadata,
             return &self.collections[collectionId] as! &Collection
         }
 
+      
         destroy () {
             destroy self.collections
             destroy self.nftCollections
@@ -237,6 +250,10 @@ Through the contract you can find variables such as Metadata,
     //variable that stores the account address that created the contract
     pub let privateKey: Address
 
+    init() {
+        self.privateKey = self.account.address
+    }
+
     pub fun createEmptyCollections(key: Address): @Collections{
     //Validation so that only the owner of the contract can create collections and mint tokens
     if key == self.privateKey {
@@ -244,8 +261,5 @@ Through the contract you can find variables such as Metadata,
     }
      panic("Account not verified")
     }
- 
-    init() {
-        self.privateKey = self.account.address
-    }
+    
 }
