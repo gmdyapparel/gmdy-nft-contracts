@@ -1,6 +1,6 @@
-import GMDYNFTContract from 0x02
-import GMDYFungibleToken from 0x01
-import GMDYMarketPlace from 0x03
+import GMDYNFTContract from 0xe8e38458359e5712
+import GMDYFungibleToken from 0xe8e38458359e5712
+import GMDYMarketPlace from 0xe8e38458359e5712
 
 // This transaction uses the signer's Vault tokens to purchase an NFT
 // from the Sale collection of account 0x01.
@@ -18,10 +18,10 @@ transaction {
   
     // get the references to the buyer's fungible token Vault
     // and NFT Collection Receiver
-    self.collectionRef = acct.borrow<&AnyResource{GMDYNFTContract.NFTReceiver}>(from: /storage/NFTCollection)
+    self.collectionRef = acct.borrow<&AnyResource{GMDYNFTContract.NFTReceiver}>(from: /storage/NFTCollection8)
         ?? panic("Could not borrow reference to the signer's nft collection")
 
-    let vaultRef = acct.borrow<&GMDYFungibleToken.Vault>(from: /storage/MainVault)
+    let vaultRef = acct.borrow<&GMDYFungibleToken.Vault>(from: /storage/MainVault8)
         ?? panic("Could not borrow reference to the signer's vault")
 
     // withdraw tokens from the buyers Vault
@@ -30,16 +30,16 @@ transaction {
 
   execute {
     // get the read-only account storage of the seller
-    let seller = getAccount(0x02)
+    let seller = getAccount(0xe8e38458359e5712)
 
     // get the reference to the seller's sale
-    let saleRef = seller.getCapability<&AnyResource{GMDYMarketPlace.SalePublic}>(/public/NFTSale)
+    let saleRef = seller.getCapability<&AnyResource{GMDYMarketPlace.SalePublic}>(/public/NFTSale8)
         .borrow()
        ?? panic("Could not borrow a reference to the sale")
 
     // purchase the NFT the the seller is selling, giving them the reference
     // to your NFT collection and giving them the tokens to buy it
-    saleRef.purchase(tokenID: 1,
+    saleRef.purchase(tokenID: 8,
         recipient: self.collectionRef,
         buyTokens: <-self.temporaryVault)
 

@@ -1,22 +1,23 @@
-import NFTContract from 0x02
+import GMDYNFTContract from 0xe8e38458359e5712
 
 transaction() {
 
     prepare(acct: AuthAccount) {
-        if acct.borrow<&NFTContract.Collections>(from: /storage/Collections) == nil {
+        if acct.borrow<&GMDYNFTContract.Collections>(from: /storage/Collections) == nil {
 
-            let newCollections <- NFTContract.createEmptyCollections()
+            let newCollections <- GMDYNFTContract.createEmptyCollections(key: acct.address)
             acct.save(<- newCollections, to: /storage/Collections)
             
             // create a public capability for the collection
-            if acct.link<&{NFTContract.CollectionsReceiver}>(/public/CollectionsReceiver, target: /storage/Collections) == nil {
+            if acct.link<&{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver, target: /storage/Collections) == nil {
                 acct.unlink(/public/MomentCollection)
             }
 
-            acct.link<&{NFTContract.CollectionsReceiver}>(/public/CollectionsReceiver, target: /storage/Collections)
+            acct.link<&{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver, target: /storage/Collections)
             log("Collections created!")
         } else {
-            panic("Collections is already exists!")
+            GMDYNFTContract.collectionExisting();
+            log("Existing Collection!")
         }
     }
 }

@@ -1,9 +1,8 @@
-import GMDYNFTContract from 0x01
+import GMDYNFTContract from 0xe8e38458359e5712
 
 transaction() {
 
       let collections : Capability<&{GMDYNFTContract.CollectionsReceiver}>
-  //let nftCollection : Capability<&{NFTContract.NFTCollectionReceiver}>?
 
   prepare(acct: AuthAccount) {
     self.collections = acct.getCapability<&{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver)
@@ -12,7 +11,7 @@ transaction() {
 
   execute {
     let collections = self.collections.borrow()!
-    collections.generateNFT(collectionId: 1, nftCollectionId: 1, amount: 23)
+    collections.generateNFT(collectionId: 11, nftCollectionId: 11, amount: 5)
   }
 
 }

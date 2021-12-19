@@ -1,7 +1,10 @@
 pub contract GMDYNFTContract {
 
-// event that is emitted when a new collection is created
+/* event that is emitted when a new collection is created */
 pub event newCollection(collectionId: UInt64, collectionName: String)
+
+/* event that warns that the collection is already created*/
+pub event existingCollection(message: String)
 
 /* This is the contract where we manage the flow of our collections and NFts*/
 
@@ -100,6 +103,7 @@ Through the contract you can find variables such as Metadata,
         pub var collectionNFT : [UInt64]
         pub let name : String
         pub let maximum : UInt64
+ 
 
         init(currentId: UInt64, name: String, collectionType: String, metadata: {String: AnyStruct}, amountToCreate: UInt64, maximum: UInt64 collection: &Collection) { 
             self.metadata = metadata
@@ -111,6 +115,7 @@ Through the contract you can find variables such as Metadata,
         }
         
         pub fun generateNFT(currentId: UInt64, amount: UInt64, collection: &Collection): UInt64 {
+        
             if Int(amount) < 0 {
                 panic("Error amount should be greather than 0")
             }
@@ -121,7 +126,7 @@ Through the contract you can find variables such as Metadata,
             if newTotal > Int(self.maximum) {
                 panic("Error amount more current nft created is greater than maximun")
             }
-            var i = 0
+            var i = 0  
             var newCurrentId = currentId
             while i < Int(amount) {
                 let newNFT <- create NFT(id: newCurrentId, name: self.name, metadata: self.metadata, collectionType: self.collectionType)
@@ -194,6 +199,7 @@ Through the contract you can find variables such as Metadata,
             let id = self.idCountNFTCollections + 1
             self.nftCollections[id] <-! nftCollection
             self.idCountNFTCollections = id
+            
             return id
         }
 
@@ -217,7 +223,7 @@ Through the contract you can find variables such as Metadata,
 
         pub fun getIdsNFT(collectionId: UInt64) : [UInt64] {
         let collection = &self.collections[collectionId]  as! &Collection
-            let ids = collection.getIDs();
+            let ids = collection.getIDs()
             return ids
         }
 
@@ -252,6 +258,11 @@ Through the contract you can find variables such as Metadata,
 
     init() {
         self.privateKey = self.account.address
+    }
+
+    //Function that emits an event that warns that the collection is already created
+    pub fun collectionExisting() {
+        emit existingCollection(message: "Collections is already exists!") 
     }
 
     pub fun createEmptyCollections(key: Address): @Collections{

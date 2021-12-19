@@ -1,9 +1,9 @@
-import GMDYFungibleToken from 0x01
+import GMDYFungibleToken from 0xe8e38458359e5712
 
 
 pub fun main() {
     // Get the accounts' public account objects
-    let acct1 = getAccount(0x01)
+    let acct1 = getAccount(0xf59da406edc00843)
 
     // Get references to the account's receivers
     // by getting their public capability
