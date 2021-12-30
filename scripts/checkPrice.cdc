@@ -2,7 +2,7 @@ import MarketPlaceGMDY from 0x583c3f5f9bbd6292
 
 
 // This script prints the NFTs that account 0x01 has for sale.
-pub fun main(): [UInt64] {
+pub fun main(): UFix64 {
 
   let account = getAccount(0x583c3f5f9bbd6292)
 
@@ -11,8 +11,12 @@ pub fun main(): [UInt64] {
         .borrow()
         ?? panic("Could not borrow a reference to the sale")
 
-  // Los the NFTs that are for sale
-   log(acct1saleRef.getIDs())
+  //log("ids for sale)
+  //log(acct1saleRef.getIDs())
   
+  // Los the NFTs that are for sale
+  log("NFTs for sale")
+  return (acct1saleRef.idPrice(tokenID: 2))
 }
+  
   

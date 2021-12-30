@@ -1,19 +1,13 @@
-import GMDYFungibleToken from 0xe8e38458359e5712
+import FungibleToken from 0x9a0766d93b6608b7
+import FUSD from 0xe223d8a629e49c68
 
+    pub fun main(): UFix64 {
+        let account = getAccount(0x7d03cfd2c59cc73e)
 
-pub fun main() {
-    // Get the accounts' public account objects
-    let acct1 = getAccount(0xf59da406edc00843)
+        let vaultRef = account
+            .getCapability(/public/fusdBalance)
+            .borrow<&FUSD.Vault{FungibleToken.Balance}>()
+            ?? panic("Could not borrow Balance capability")
 
-    // Get references to the account's receivers
-    // by getting their public capability
-    // and borrowing a reference from the capability
-    let acct1ReceiverRef = acct1.getCapability<&GMDYFungibleToken.Vault{GMDYFungibleToken.Balance}>(/public/MainReceiver)
-        .borrow()
-        ?? panic("Could not borrow acct1 vault receiver reference")
-  
-
-    log("Account Balance")
-    log(acct1ReceiverRef.balance)
-
-}
+        return vaultRef.balance
+    }

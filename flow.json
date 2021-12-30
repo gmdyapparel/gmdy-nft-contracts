@@ -21,12 +21,12 @@
 			"key": "de2b8dc28e07d5c031e038431bdee1a10d5e745c71f505175972caf1e959ba63"
 		},
 		"gmdy-testnet": {
-			"address": "0xe8e38458359e5712",
-			"key": "e84b28b8bbdfc19db00a5f789f168e9f3cea5cc4fcd7db19d24a099aca31bac8"
+			"address": "0x6c4bbae808f9ced9",
+			"key": "6f44732398a01588eefdfb5bee1c80a3687494b01e78c84c213abfd678643e37"
 		},
 		"buyer-testnet": {
-			"address": "0xf59da406edc00843",
-			"key": "13628a4c960e0bc30b9fc7c4b3ebfa582057f591d3a84bac18cc6c4a21a1e7bb"
+			"address": "0x7a1fdfdb91fdc4b8",
+			"key": "d47a690bd0e305ee9a79bb859d24aa70af8a96c351e3ea9d0072f01acbc6260e"
 		}
 	},
 	"deployments": {

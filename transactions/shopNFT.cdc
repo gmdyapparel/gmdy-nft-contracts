@@ -1,48 +1,61 @@
-import GMDYNFTContract from 0xe8e38458359e5712
-import GMDYFungibleToken from 0xe8e38458359e5712
-import GMDYMarketPlace from 0xe8e38458359e5712
+import GMDYNFTContract from 0x6c4bbae808f9ced9
+import GMDYMarketPlace from 0x6c4bbae808f9ced9
+import FungibleToken from 0x01
+import FUSD from 0x04
 
-// This transaction uses the signer's Vault tokens to purchase an NFT
-// from the Sale collection of account 0x01.
-transaction {
+       /* { This transaction purchase a NFT } */
+transaction(collectionId: UInt64, ownerCollections: Address, seller: Address, tokenID: UInt64 ) {
 
-  // reference to the buyer's NFT collection where they
-  // will store the bought NFT
-  let collectionRef: &AnyResource{GMDYNFTContract.NFTReceiver}
+            prepare(acct: AuthAccount) {
 
-  // Vault that will hold the tokens that will be used to
-  // buy the NFT
-  let temporaryVault: @GMDYFungibleToken.Vault
+          /* ### This conditional verifies that the buyer has a receiving collection to deposit the purchased NFT,
+                                if it does not have it, it is created ## */
+            if (acct.borrow<&{GMDYNFTContract.NFTReceiver}>(from: /storage/GmdyCollection1) == nil) {
+                let account = getAccount(ownerCollections)
+              
+                          /*Get Collection Metadata to create a receiving collection*/
+              let collect = account.getCapability<&AnyResource{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver)
+                .borrow() ?? panic("Could not borrow collections reference")
+                
+              /*data array*/
+              let data = collect.getCollectionRef(collectionId: collectionId)
 
-  prepare(acct: AuthAccount) {
-  
-    // get the references to the buyer's fungible token Vault
-    // and NFT Collection Receiver
-    self.collectionRef = acct.borrow<&AnyResource{GMDYNFTContract.NFTReceiver}>(from: /storage/NFTCollection8)
-        ?? panic("Could not borrow reference to the signer's nft collection")
+                                /* Saving receiving collection*/
+              acct.save(<- GMDYNFTContract.createEmptyCollection(name: data.name, metadata: data.metadata), to: /storage/GmdyCollection1)
 
-    let vaultRef = acct.borrow<&GMDYFungibleToken.Vault>(from: /storage/MainVault8)
-        ?? panic("Could not borrow reference to the signer's vault")
+                              // publish a capability to the Collection in storage
+              acct.link<&{GMDYNFTContract.NFTReceiver}>(/public/GmdyCollection1, target: /storage/GmdyCollection1)
+              }
+            
 
-    // withdraw tokens from the buyers Vault
-    self.temporaryVault <- vaultRef.withdraw(amount: 10.0)
-  }
+                      /* ~Look for the reference of the NFT that is for sale~ */
+               let saleCollecction = getAccount(seller).getCapability(/public/MYSaleColecction)
+                     .borrow<&GMDYMarketPlace.SaleCollection{GMDYMarketPlace.SalePublic}>()
+                     ?? panic("Could not borrow a reference to the sale")
 
-  execute {
-    // get the read-only account storage of the seller
-    let seller = getAccount(0xe8e38458359e5712)
+                       /* ~Find the container where the purchased NFT will be stored~ */
+               let recipientCollection = getAccount(acct.address).getCapability(/public/GmdyCollection1) 
+                                 .borrow<&AnyResource{GMDYNFTContract.NFTReceiver}>()
+                                 ?? panic("Can't get the User's collection.")
 
-    // get the reference to the seller's sale
-    let saleRef = seller.getCapability<&AnyResource{GMDYMarketPlace.SalePublic}>(/public/NFTSale8)
-        .borrow()
-       ?? panic("Could not borrow a reference to the sale")
+                //get price of the NFT
+              let price = saleCollecction.idPrice(tokenID: tokenID)
 
-    // purchase the NFT the the seller is selling, giving them the reference
-    // to your NFT collection and giving them the tokens to buy it
-    saleRef.purchase(tokenID: 8,
-        recipient: self.collectionRef,
-        buyTokens: <-self.temporaryVault)
+              //get vault of the buyer
+               let vault = acct.borrow<&FUSD.Vault>(from: /storage/fusdVault)
+                ?? panic("Could not borrow reference to the owner's Vault!")
+           
+               if vault == nil {
+                panic("Could not borrow GMDYVault, have you set up your account?")
+               }
+                            /* ~withdraw the money to pay~ */
+               let payment <- vault.withdraw(amount: price) as! @FUSD.Vault
 
-    log("Token has been bought")
-  }
-}
+                          /* ~gives the money to the seller and sends the NFT to the buyer~ */
+               saleCollecction.purchase(tokenID: tokenID, recipient: recipientCollection, payment: <- payment)
+               }
+             
+             execute {
+               log("A user purchased an NFT")
+             }
+           }

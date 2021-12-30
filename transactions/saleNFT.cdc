@@ -1,45 +1,63 @@
-import GMDYNFTContract from 0xe8e38458359e5712
-import GMDYFungibleToken from 0xe8e38458359e5712
-import GMDYMarketPlace from 0xe8e38458359e5712
+import GMDYNFTContract from 0x02
+import GMDYMarketPlace from 0x03
+import FUSD from 0x04
+import FungibleToken from 0x01
 
-// This transaction creates a new Sale Collection object,
-transaction {
-
+        /* This transacction is to put an NFT up for sale */
+transaction(collectionId: UInt64, tokenID: UInt64, price: UFix64) {
     let collections : Capability<&{GMDYNFTContract.CollectionsReceiver}>
 
     prepare(acct: AuthAccount) {
-        self.collections = acct.getCapability<&{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver)
 
-        // Borrow a reference to the stored Vault
-        //if  acct.getCapability<&GMDYFungibleToken>(/public/MainReceiver) == nil {
+     /* ## Verify that the account has a vault to receive payments ## */
+        if(acct.borrow<&FUSD.Vault>(from: /storage/fusdVault) == nil) {
+            // Create a new FUSD Vault and put it in storage
+            acct.save(<-FUSD.createEmptyVault(), to: /storage/fusdVault)
+
+            // Create a public capability to the Vault that only exposes
+            // the deposit function through the Receiver interface
+            acct.link<&FUSD.Vault{FungibleToken.Receiver}>(
+                /public/fusdReceiver,
+                target: /storage/fusdVault
+            )
+
+            // Create a public capability to the Vault that only exposes
+            // the balance field through the Balance interface
+            acct.link<&FUSD.Vault{FungibleToken.Balance}>(
+                /public/fusdBalance,
+                target: /storage/fusdVault
+            )
+        }
+
+              /* ## condition that verifies that you have a collection created in the MarketPlace to sell NFT ## */
+       if (acct.borrow<&GMDYMarketPlace.SaleCollection{GMDYMarketPlace.SalePublic}>(from: /storage/MYSaleColecction) == nil) {
+
+            let MYNFTCollection = acct.getCapability<&GMDYNFTContract.Collection>(/public/CollectionsReceiver)
+            let FlowtokenVault = acct.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
+
+            acct.save(<- GMDYMarketPlace.createSaleCollection(MYNFTCollection: MYNFTCollection, FlowtokenVault: FlowtokenVault), to: /storage/MYSaleColecction)
+            acct.link<&GMDYMarketPlace.SaleCollection{GMDYMarketPlace.SalePublic}>(/public/MYSaleColecction, target: /storage/MYSaleColecction)
+        }
         
-            acct.save(<- GMDYFungibleToken.createEmptyVault(), to: /storage/MainVault8)
-            acct.link<&{GMDYFungibleToken.Receiver}>(/public/MainReceiver8, target: /storage/MainVault8)
-        //}
-        let receiver = acct.getCapability<&{GMDYFungibleToken.Receiver}>(/public/MainReceiver8)
-   
-        // Create a public Receiver capability to the Vault
-        acct.link<&GMDYFungibleToken.Vault{GMDYFungibleToken.Receiver, GMDYFungibleToken.Balance}>
-             (/public/MainReceiver8, target: /storage/MainVault8)
-             
-        // Create a new Sale object, 
-        // initializing it with the reference to the owner's vault
-        let sale <- GMDYMarketPlace.createSaleCollection(ownerVault: receiver)
+                  /* ~Gets the reference of the collection of the NFTs~ */
+        self.collections = acct.getCapability<&{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver)
         
         // borrow a reference to the NFTCollection in storage
         let collectionsRef = self.collections.borrow() ?? panic("Could not borrow a reference to the owner's nft collection")
+
+           let saleCollection = acct.borrow<&GMDYMarketPlace.SaleCollection>(from: /storage/MYSaleColecction)
+                            ?? panic("This SaleCollection does not exist")
         
         // Withdraw the NFT from the collection that you want to sell
-        let token <- collectionsRef.withdraw(collectionId: 1, withdrawID: 8)
-        
-        // List the token for sale by moving it into the sale object
-        sale.listForSale(token: <-token, price: 10.0)
-      
-         acct.save<@GMDYMarketPlace.SaleCollection>(<-sale, to: /storage/NFTSale8)
+        let token <- collectionsRef.withdraw(collectionId: collectionId, withdrawID: tokenID)
 
-        // Create a public capability to the sale so that others can call its methods
-        acct.link<&GMDYMarketPlace.SaleCollection{GMDYMarketPlace.SalePublic}>(/public/NFTSale8, target: /storage/NFTSale8)
  
-            log("Sale Created")
+        // List the token for sale by moving it into the sale object
+        saleCollection.listForSale(token: <-token, price: price)
+        
     }
+    execute {
+        log("Sale Created")
+        }
 }
+ 
