@@ -1,15 +1,16 @@
-import GMDYNFTContract from 0x02
-import GMDYMarketPlace from 0x03
+import GMDYNFTContract from 0xab43461c2152a9d7
+import MarketPlaceGMDY from 0xab43461c2152a9d7
 
-        /* ~~ */ /*This Transaction is for Sale Withdrawn  */ /* ~~ */
+        /* ~~ */ /*This transaction is to withdraw the sale (Market owners) */ /* ~~ */
 transaction(collectionId: UInt64, withdrawID: UInt64) {
 
-    
+    let collections : Capability<&{GMDYNFTContract.CollectionsReceiver}>
     prepare(acct: AuthAccount) {
                  /* ~Gets the reference of the collection of the NFTs~ */
-        let collections = acct.getCapability<&{GMDYNFTContract.NFTReceiver}>(/public/GmdyCollection1)
-                                .borrow() ?? panic("Could not borrow a reference to the owner's nft collection")
-                        
+        self.collections = acct.getCapability<&{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver)
+
+        // borrow a reference to the NFTCollection in storage
+        let collectionsRef = self.collections.borrow() ?? panic("Could not borrow a reference to the owner's nft collection")
 
              /* ~Look for the reference of the NFT that is for sale~ */
          let saleCollecction = getAccount(0x02).getCapability(/public/MYSaleColecction)
@@ -21,7 +22,7 @@ transaction(collectionId: UInt64, withdrawID: UInt64) {
         let token <-  saleCollecction.withdraw(tokenID: withdrawID)
 
                         /* Insert the withdrawn token */
-        collections.deposit(token: <- token)
+        collectionsRef.depositNFT(collectionId: collectionId, token: <- token)
     }
 
     execute {

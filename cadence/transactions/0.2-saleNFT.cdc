@@ -1,7 +1,7 @@
-import GMDYNFTContract from 0x02
-import GMDYMarketPlace from 0x03
-import FUSD from 0x04
-import FungibleToken from 0x01
+import GMDYNFTContract from 0xab43461c2152a9d7
+import MarketPlaceGMDY from 0xab43461c2152a9d7
+import FungibleToken from 0x9a0766d93b6608b7
+import FUSD from 0xe223d8a629e49c68
 
         /* This transacction is to put an NFT up for sale */
 transaction(collectionId: UInt64, tokenID: UInt64, price: UFix64) {

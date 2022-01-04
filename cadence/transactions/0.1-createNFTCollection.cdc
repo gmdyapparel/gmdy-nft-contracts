@@ -1,4 +1,4 @@
-import GMDYNFTContract from 0x02
+import GMDYNFTContract from 0xab43461c2152a9d7
 
   /* ## This Transacction Minst */
 transaction {

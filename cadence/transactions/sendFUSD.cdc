@@ -1,7 +1,8 @@
-import FungibleToken from 0x01
-import FUSD from 0x04
+import FungibleToken from 0x9a0766d93b6608b7
+import FUSD from 0xe223d8a629e49c68
 
-/* Tranaction for send Fusd toother account */
+
+/* Transaction to send FUSD to another account simply for testing purposes*/
 transaction(recipient: Address) {
 
   // The Vault resource that holds the tokens that are being transfered

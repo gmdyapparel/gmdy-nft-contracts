@@ -1,7 +1,7 @@
-import GMDYNFTContract from 0x02
-import GMDYMarketPlace from 0x03
+import GMDYNFTContract from 0xab43461c2152a9d7
+import MarketPlaceGMDY from 0xab43461c2152a9d7
 
-    /* This transaction Resale NFT */
+    /* This transaction is to make an NFT Resale (App users)*/
 transaction {
 
     let collections : Capability<&{GMDYNFTContract.CollectionsReceiver}>

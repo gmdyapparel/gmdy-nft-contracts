@@ -1,7 +1,7 @@
-import GMDYNFTContract from 0x6c4bbae808f9ced9
-import GMDYMarketPlace from 0x6c4bbae808f9ced9
-import FungibleToken from 0x01
-import FUSD from 0x04
+import GMDYNFTContract from 0xab43461c2152a9d7
+import MarketPlaceGMDY from 0xab43461c2152a9d7
+import FungibleToken from 0x9a0766d93b6608b7
+import FUSD from 0xe223d8a629e49c68
 
        /* { This transaction purchase a NFT } */
 transaction(collectionId: UInt64, ownerCollections: Address, seller: Address, tokenID: UInt64 ) {
