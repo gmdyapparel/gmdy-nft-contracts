@@ -2,8 +2,7 @@ import GMDYNFTContract from 0xab43461c2152a9d7
 import FungibleToken from 0x9a0766d93b6608b7
 import FUSD from 0xe223d8a629e49c68
 
-
-pub contract MarketPlaceGMDY {
+pub contract GMDYMarketPlace{
 
     // Event that is emitted when a new NFT is put up for sale
     pub event ForSale(id: UInt64, price: UFix64)
@@ -18,9 +17,10 @@ pub contract MarketPlaceGMDY {
     pub event SaleWithdrawn(id: UInt64)
 
     // Interface that users will publish for their Sale collection
-    // that only exposes the methods that are supposed to be public
+    // that only exposes the methods that are supposed to be public 
     pub resource interface SalePublic {
         pub fun purchase(tokenID: UInt64, recipient: &AnyResource{GMDYNFTContract.NFTReceiver}, payment: @FUSD.Vault)
+        pub fun withdraw(tokenID: UInt64): @GMDYNFTContract.NFT
         pub fun idPrice(tokenID: UInt64): UFix64
         pub fun getIDs(): [UInt64]
     }
@@ -64,6 +64,8 @@ pub contract MarketPlaceGMDY {
             self.prices.remove(key: tokenID)
             // remove and return the token
             let token <- self.forSale.remove(key: tokenID) ?? panic("missing NFT")
+
+            emit SaleWithdrawn(id: tokenID)
             return <-token
         }
 
@@ -90,7 +92,7 @@ pub contract MarketPlaceGMDY {
             /* Emit Event*/
             emit TokenPurchased(id: tokenID, price: price)
         }
-        
+
         init (_MYNFTCollection: Capability<&GMDYNFTContract.Collection>, _FlowtokenVault: Capability<&FUSD.Vault{FungibleToken.Receiver}>) {
             self.forSale <- {}
             self.FlowTokenVault = _FlowtokenVault
@@ -129,3 +131,4 @@ pub contract MarketPlaceGMDY {
     
     }
 }
+ 

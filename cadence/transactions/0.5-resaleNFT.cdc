@@ -1,5 +1,5 @@
 import GMDYNFTContract from 0xab43461c2152a9d7
-import MarketPlaceGMDY from 0xab43461c2152a9d7
+import GMDYMarketPlace from 0xab43461c2152a9d7
 
     /* This transaction is to make an NFT Resale (App users)*/
 transaction {
