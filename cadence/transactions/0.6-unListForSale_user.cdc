@@ -1,5 +1,5 @@
-import GMDYNFTContract from 0xab43461c2152a9d7
-import GMDYMarketPlace from 0xab43461c2152a9d7
+import GMDYNFTContract from 0xe7eeedb550d0d497
+import GMDYMarketPlace from 0xe7eeedb550d0d497
 
         /* ~~ */ /*This transaction is to withdraw the sale (App users)*/ /* ~~ */
 transaction(collectionId: UInt64, withdrawID: UInt64) {

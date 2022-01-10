@@ -3,7 +3,7 @@ import FUSD from 0xe223d8a629e49c68
 
 
     pub fun main(): UFix64 {
-        let account = getAccount(0x7d03cfd2c59cc73e)
+        let account = getAccount(0xe7eeedb550d0d497)
 
         let vaultRef = account
             .getCapability(/public/fusdBalance)

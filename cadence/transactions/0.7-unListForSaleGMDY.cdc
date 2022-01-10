@@ -1,5 +1,5 @@
-import GMDYNFTContract from 0xab43461c2152a9d7
-import GMDYMarketPlace from 0xab43461c2152a9d7
+import GMDYNFTContract from 0xe7eeedb550d0d497
+import GMDYMarketPlace from 0xe7eeedb550d0d497
 
         /* ~~ */ /*This transaction is to withdraw the sale (Market owners) */ /* ~~ */
 transaction(collectionId: UInt64, withdrawID: UInt64) {
@@ -13,7 +13,7 @@ transaction(collectionId: UInt64, withdrawID: UInt64) {
         let collectionsRef = self.collections.borrow() ?? panic("Could not borrow a reference to the owner's nft collection")
 
              /* ~Look for the reference of the NFT that is for sale~ */
-         let saleCollecction = getAccount(0x02).getCapability(/public/MYSaleColecction)
+         let saleCollecction = getAccount(0xe7eeedb550d0d497).getCapability(/public/MYSaleColecction)
             .borrow<&GMDYMarketPlace.SaleCollection{GMDYMarketPlace.SalePublic}>()
                      ?? panic("Could not borrow a reference to the sale")
 

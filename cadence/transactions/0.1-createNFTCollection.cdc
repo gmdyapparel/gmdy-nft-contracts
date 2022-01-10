@@ -1,4 +1,4 @@
-import GMDYNFTContract from 0xab43461c2152a9d7
+import GMDYNFTContract from 0xe7eeedb550d0d497
 
   /* ## This Transacction Minst */
 transaction {
@@ -14,7 +14,8 @@ transaction {
             
             // create a public capability for the collection
             if acct.link<&{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver, target: /storage/Collections) == nil {
-                acct.unlink(/public/MomentCollection)
+
+                acct.unlink(/public/CollectionsReceiver)
             }
 
             acct.link<&{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver, target: /storage/Collections)
@@ -24,14 +25,14 @@ transaction {
   }
 
   execute {
-    let metadataCollection : {String : String} = {
+    let metadataCollection : {String : AnyStruct} = {
       "banner": "ipfs://QmSRydNqzGFYCap3tf32zoL2onUYpTpVm4tGx9YVS3RRDa"
     }
     let nameCollection : String = "Neymar collection"
     let name = "Neymar Jr"
     let collectionType = "common"
-    let amountToCreate = 12  as UInt64
-    let maximum = 20  as UInt64
+    let amountToCreate = 10  as UInt64
+    let maximum = 10000  as UInt64
     let metadataNFT : {String : String} = {
         "name": "Avatar",
         "description": "Moonlight Avatar", 

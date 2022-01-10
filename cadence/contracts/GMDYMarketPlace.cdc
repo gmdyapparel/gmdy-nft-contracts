@@ -1,26 +1,29 @@
-import GMDYNFTContract from 0xab43461c2152a9d7
-import FungibleToken from 0x9a0766d93b6608b7
+import GMDYNFTContract from 0x9d0198a3907d2ffc
 import FUSD from 0xe223d8a629e49c68
+import FungibleToken from 0x9a0766d93b6608b7
+import NonFungibleToken from 0x631e88ae7f1d7c20
 
-pub contract GMDYMarketPlace{
 
+pub contract GMDYMarketPlace {
+
+ 
     // Event that is emitted when a new NFT is put up for sale
-    pub event ForSale(id: UInt64, price: UFix64)
+    pub event ForSale(id: UInt64, price: UFix64, seller: Address?)
 
     // Event that is emitted when the price of an NFT changes
-    pub event PriceChanged(id: UInt64, newPrice: UFix64)
+    pub event PriceChanged(id: UInt64, newPrice: UFix64, seller: Address?)
     
     // Event that is emitted when a token is purchased
-    pub event TokenPurchased(id: UInt64, price: UFix64)
+    pub event TokenPurchased(id: UInt64, price: UFix64, seller: Address?)
 
     // Event that is emitted when a seller withdraws their NFT from the sale
-    pub event SaleWithdrawn(id: UInt64)
+    pub event SaleWithdrawn(id: UInt64, seller: Address?)
 
     // Interface that users will publish for their Sale collection
     // that only exposes the methods that are supposed to be public 
     pub resource interface SalePublic {
-        pub fun purchase(tokenID: UInt64, recipient: &AnyResource{GMDYNFTContract.NFTReceiver}, payment: @FUSD.Vault)
-        pub fun withdraw(tokenID: UInt64): @GMDYNFTContract.NFT
+        pub fun purchase(tokenID: UInt64, recipient: &AnyResource{GMDYNFTContract.CollectionPublic}, payment: @FUSD.Vault)
+        pub fun withdraw(tokenID: UInt64): @NonFungibleToken.NFT
         pub fun idPrice(tokenID: UInt64): UFix64
         pub fun getIDs(): [UInt64]
     }
@@ -33,7 +36,7 @@ pub contract GMDYMarketPlace{
     pub resource SaleCollection: SalePublic {
 
         // Dictionary of the NFTs that the user is putting up for sale
-        pub var forSale: @{UInt64: GMDYNFTContract.NFT}
+        pub var forSale: @{UInt64: NonFungibleToken.NFT}
          // Dictionary of the prices for each NFT by ID
         pub var prices: {UInt64: UFix64}
 
@@ -43,7 +46,7 @@ pub contract GMDYMarketPlace{
         pub let MyNFTCollection: Capability<&GMDYNFTContract.Collection>
 
          /* listForSale lists an NFT for sale in this collection */
-        pub fun listForSale(token: @GMDYNFTContract.NFT, price: UFix64) {
+        pub fun listForSale(token: @NonFungibleToken.NFT, price: UFix64) {
         pre {
             price >= 0.0: "It doesn't make sense to list a token for less than 0.0"
             
@@ -55,22 +58,22 @@ pub contract GMDYMarketPlace{
             let oldToken <- self.forSale[id] <- token
             destroy oldToken
 
-            emit ForSale(id: id, price: price)
+            emit ForSale(id: id, price: price, seller: self.owner?.address)
         }
 
         /* withdraw gives the owner the opportunity to remove a sale from the collection */
-        pub fun withdraw(tokenID: UInt64): @GMDYNFTContract.NFT {
+        pub fun withdraw(tokenID: UInt64): @NonFungibleToken.NFT {
             // remove the price
             self.prices.remove(key: tokenID)
             // remove and return the token
             let token <- self.forSale.remove(key: tokenID) ?? panic("missing NFT")
 
-            emit SaleWithdrawn(id: tokenID)
+            emit SaleWithdrawn(id: tokenID, seller: self.owner?.address)
             return <-token
         }
 
            /* purchase lets a user send tokens to purchase an NFT that is for sale */
-        pub fun purchase(tokenID: UInt64, recipient: &AnyResource{GMDYNFTContract.NFTReceiver}, payment: @FUSD.Vault) {
+        pub fun purchase(tokenID: UInt64, recipient: &AnyResource{GMDYNFTContract.CollectionPublic}, payment: @FUSD.Vault) {
             pre {
                 self.forSale[tokenID] != nil && self.prices[tokenID] != nil:
                     "No token matching this ID for sale!"
@@ -90,7 +93,7 @@ pub contract GMDYMarketPlace{
             vaultRef.deposit(from: <- payment)
             
             /* Emit Event*/
-            emit TokenPurchased(id: tokenID, price: price)
+            emit TokenPurchased(id: tokenID, price: price, seller: self.owner?.address)
         }
 
         init (_MYNFTCollection: Capability<&GMDYNFTContract.Collection>, _FlowtokenVault: Capability<&FUSD.Vault{FungibleToken.Receiver}>) {
@@ -104,7 +107,7 @@ pub contract GMDYMarketPlace{
         pub fun changePrice(tokenID: UInt64, newPrice: UFix64) {
             self.prices[tokenID] = newPrice
 
-            emit PriceChanged(id: tokenID, newPrice: newPrice)
+            emit PriceChanged(id: tokenID, newPrice: newPrice, seller: self.owner?.address)
         }
 
         /* idPrice returns the price of a specific token in the sale */
@@ -131,4 +134,3 @@ pub contract GMDYMarketPlace{
     
     }
 }
- 

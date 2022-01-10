@@ -1,10 +1,10 @@
-import GMDYNFTContract from 0xab43461c2152a9d7
+import GMDYNFTContract from 0xe7eeedb550d0d497
 
 
 pub fun main(): Int? {
-      let account = getAccount(0x02)
+      let account = getAccount(0xe7eeedb550d0d497)
       let collectRef = account.getCapability<&AnyResource{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver)
       .borrow() ?? panic("Could not borrow collections reference")
       
-      return collectRef.getAavailableSpacesCollect(nftCollectionId: 11)
+      return collectRef.getAavailableSpacesCollect(nftCollectionId: 1)
 }
