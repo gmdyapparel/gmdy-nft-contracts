@@ -7,7 +7,7 @@ pub fun main(): GMDYNFTContract.MetadataDisplay {
       let collectRef = account.getCapability<&AnyResource{GMDYNFTContract.CollectionsReceiver}>(/public/CollectionsReceiver)
       .borrow() ?? panic("Could not borrow collections reference")
       
-    let nft = collectRef.getMetadataNft(collectionId: 1, tokenId: 1) ?? panic("Could not borrow NFT reference")
+    let nft = collectRef.getMetadataNFTGMDY(collectionId: 1, tokenId: 1) ?? panic("Could not borrow NFT reference")
 
 
 // Get the basic display information for this NFT
