@@ -1,5 +1,6 @@
 import NonFungibleToken from 0x631e88ae7f1d7c20
 
+
 pub contract GMDYNFTContract: NonFungibleToken {
 
 // Initialize the total supply
@@ -12,13 +13,15 @@ pub event ContractInitialized()
 /* withdraw event */
 pub event Withdraw(id: UInt64, from: Address?)
 /* Event that is issued when an NFT is deposited */
- pub event Deposit(id: UInt64, to: Address?)
+pub event Deposit(id: UInt64, to: Address?)
 /* event that is emitted when a new collection is created */
 pub event NewCollection(collectionId: UInt64, collectionName: String)
 /* event that warns that the collection is already created*/
 pub event ExistingCollection(message: String)
 /* Event that is emitted when new NFTs are cradled*/
 pub event NewNFTsminted(collectionId: UInt64, amount: UInt64)
+/* Event that is emitted when an NFT collection is created */
+pub event CreateNFTCollection(id: UInt64,amount: UInt64)
 
 
 /* ## ~~This is the contract where we manage the flow of our collections and NFTs~~  ## */
@@ -90,8 +93,13 @@ Through the contract you can find variables such as Metadata,
         pub fun idExists(id: UInt64): Bool
         pub fun getRefNFT(id: UInt64): &NonFungibleToken.NFT
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
+        pub fun borrowGMDYNFT(id: UInt64): &GMDYNFTContract.NFT? {
+            post {
+                (result == nil) || (result?.id == id):
+                    "Cannot borrow GMDYNFT reference: the ID of the returned reference is incorrect"
+            }
+        }
         pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT
-       
     }
 
 // We define this interface simply as a way to allow users to
@@ -169,6 +177,7 @@ Through the contract you can find variables such as Metadata,
         pub fun idExists(id: UInt64): Bool {
             return self.ownedNFTs[id] != nil
         }
+        
      
         destroy () {
             destroy self.ownedNFTs
@@ -249,7 +258,7 @@ Through the contract you can find variables such as Metadata,
         pub fun createNFTCollection(name: String, collectionType: String, metadata: {String: AnyStruct}, amountToCreate: UInt64, maximum: UInt64, collectionId: UInt64): UInt64 
         pub fun generateNFT(collectionId: UInt64, nftCollectionId: UInt64, amount: UInt64)
         pub fun getAvailableSpacesCollect(nftCollectionId: UInt64):Int 
-         pub fun getMetadataNft(collectionId: UInt64, tokenId: UInt64): &GMDYNFTContract.NFT? {
+        pub fun getMetadataNFTGMDY(collectionId: UInt64, tokenId: UInt64): &GMDYNFTContract.NFT? {
             post {
                 (result == nil) || (result?.id == tokenId):
                     "Cannot borrow GMDYNFT reference: the ID of the returned reference is incorrect"
@@ -299,6 +308,7 @@ Through the contract you can find variables such as Metadata,
             self.nftCollections[id] <-! nftCollection
             self.idCountNFTCollections = id
             
+            emit  CreateNFTCollection(id: id, amount: amountToCreate)
             return id
         }
 
@@ -316,9 +326,18 @@ Through the contract you can find variables such as Metadata,
             return nftCollection.getQuantityAvailablesForCreate()
         }
 
-         pub fun getMetadataNft(collectionId: UInt64, tokenId: UInt64): &GMDYNFTContract.NFT?  {
+         pub fun getMetadataNFTGMDY(collectionId: UInt64, tokenId: UInt64): &GMDYNFTContract.NFT?  {
           let collection = &self.collections[collectionId] as! &Collection
             let ref  = collection.borrowGMDYNFT(id: tokenId)
+            if ref != nil {
+            return ref
+            }
+            return panic("NFT not found")
+        }
+
+         pub fun getMetadataNFTUSER(tokenId: UInt64): &GMDYNFTContract.NFT? {
+           let collection = &self.collections[tokenId] as! &Collection
+          let ref = collection.borrowGMDYNFT(id: tokenId)
             if ref != nil {
             return ref
             }
@@ -406,3 +425,4 @@ Through the contract you can find variables such as Metadata,
         emit ContractInitialized()
     }
 }
+
