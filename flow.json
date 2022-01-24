@@ -6,9 +6,7 @@
 		}
 	},
 	"contracts": {
-		"GMDYFungibleToken" : "./cadence/contracts/GMDYFungibleToken.cdc",
-		"GMDYNFTContract" : "./cadence//contracts/GMDYNFTContract.cdc",
-		"GMDYMarketPlace": "./cadence//contracts/GMDYMarketPlace.cdc"
+		"GMDYNFTContract" : "./cadence//contracts/GMDYNFTContract.cdc"
 	},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
@@ -32,9 +30,7 @@
 	"deployments": {
 		"testnet": {
 			"gmdy-testnet": [
-				"GMDYFungibleToken",
-				"GMDYNFTContract",
-				"GMDYMarketPlace"
+				"GMDYNFTContract"
 			]
 		}
 	}
