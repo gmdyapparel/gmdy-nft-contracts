@@ -244,6 +244,8 @@ pub contract GMDYNFTContract: NonFungibleToken {
                 newCurrentId = 1 + newCurrentId as UInt64
                 GMDYNFTContract.totalSupply = newCurrentId
             }
+            let idsNFTminted = collectionBorrow.getIDs()
+            emit TotalsIDs(ids: idsNFTminted)
         }
     
         pub fun getQuantityAvailablesForCreate(): Int {
