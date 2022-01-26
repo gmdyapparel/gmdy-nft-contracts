@@ -1,5 +1,5 @@
 import NonFungibleToken from 0x631e88ae7f1d7c20
-import MetadataViews from 0x1b087c9338699c77
+import MetadataViews from 0xf9e66a0c2eceafc7
 
 pub contract GMDYNFTContract: NonFungibleToken {
 
@@ -35,20 +35,6 @@ pub contract GMDYNFTContract: NonFungibleToken {
     which could be the url where our images live
     */
 
-    //Struc Metadata NFT
-    pub struct MetadataDisplay {
-        pub let name: String
-        pub let nftType : String
-        pub var metadata : {String: AnyStruct}
-
-        init (metadata: {String: AnyStruct}, nftType: String, name: String) {
-            self.metadata = metadata
-            self.nftType = nftType
-            self.name = name
-        }
-    }
-
-
     //In this section you will find our variables and fields for our NFTs and Collections
     pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver  {
     // The unique ID that each NFT has
@@ -57,27 +43,37 @@ pub contract GMDYNFTContract: NonFungibleToken {
         pub var metadata : {String: AnyStruct}
         pub let nftType : String
         pub let name: String
+        pub let description: String
+        pub let thumbnail: String
 
-        init(id : UInt64, name: String, metadata: {String:AnyStruct}, nftType : String) {
+        init(id : UInt64, name: String, metadata: {String:AnyStruct}, nftType : String, thumbnail: String, description: String) {
             self.id = id
             self.metadata = metadata
             self.nftType = nftType
             self.name = name
+            self.thumbnail = thumbnail
+            self.description = description
         }
 
          pub fun getViews(): [Type] {
             return [
-                Type<MetadataDisplay>()
+                Type<MetadataViews.Display>()
             ]
+        }
+
+        pub fun getMetadata():AnyStruct? {
+        return self.metadata
         }
 
          pub fun resolveView(_ view: Type): AnyStruct? {
             switch view {
-                case Type<MetadataDisplay>():
-                    return MetadataDisplay(
-                    metadata: self.metadata,
-                    nftType: self.nftType,   
-                    name: self.name,
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: self.name,
+                        description: self.description,
+                        thumbnail: MetadataViews.HTTPFile(
+                            url: self.thumbnail
+                        )
                     )
             }
             return nil
@@ -99,7 +95,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
         pub fun borrowGMDYNFT(id: UInt64): &GMDYNFTContract.NFT? {
             post {
                 (result == nil) || (result?.id == id):
-                    "Cannot borrow GMDYNFT reference: the ID of the returned reference is incorrect"
+                    "Cannot borrow NFT reference: the ID of the returned reference is incorrect"
             }
         }
     }
@@ -167,12 +163,6 @@ pub contract GMDYNFTContract: NonFungibleToken {
             panic("not found NFT")
         }
 
-           pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
-            let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-            let gmdyNFT = nft as! &GMDYNFTContract.NFT
-            return gmdyNFT as &AnyResource{MetadataViews.Resolver}
-        }
-
         pub fun borrowGMDYNFT(id: UInt64): &GMDYNFTContract.NFT? {
             if self.ownedNFTs[id] != nil {
                 // Create an authorized reference to allow downcasting
@@ -187,7 +177,12 @@ pub contract GMDYNFTContract: NonFungibleToken {
             return self.ownedNFTs[id] != nil
         }
         
-     
+         pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+            let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+            let gmdyNFT = nft as! &GMDYNFTContract.NFT
+            return gmdyNFT as &AnyResource{MetadataViews.Resolver}
+        }
+
         destroy () {
             destroy self.ownedNFTs
         }
@@ -208,13 +203,17 @@ pub contract GMDYNFTContract: NonFungibleToken {
         // array NFT
         pub var collectionNFT : [UInt64]
         pub let name : String
+        pub let thumbnail:  String
+        pub let description: String
         pub let maximum : UInt64
  
-        init(name: String, nftType: String, metadata: {String: AnyStruct}, amountToCreate: UInt64, maximum: UInt64 collection: Capability<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>) { 
+        init(name: String, nftType: String, metadata: {String: AnyStruct}, thumbnail: String, description: String, amountToCreate: UInt64, maximum: UInt64 collection: Capability<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>) { 
             self.metadata = metadata
             self.name = name
             self.nftType = nftType
             self.maximum = maximum
+            self.thumbnail = thumbnail
+            self.description = description
             self.collectionNFT = []
             self.generateNFT(amount: amountToCreate, collection: collection)
         }
@@ -237,7 +236,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
             let collectionBorrow = collection.borrow() ?? panic("cannot borrow collection")
               emit NewNFTsminted(amount: amount)
             while i < Int(amount) {
-                let newNFT <- create NFT(id: newCurrentId, name: self.name, metadata: self.metadata, nftType: self.nftType)
+                let newNFT <- create NFT(id: newCurrentId, name: self.name, metadata: self.metadata, nftType: self.nftType, thumbnail: self.thumbnail, description: self.description)
                 collectionBorrow.deposit(token: <- newNFT)
                 self.collectionNFT.append(newCurrentId)
                 i = i + 1
@@ -254,7 +253,11 @@ pub contract GMDYNFTContract: NonFungibleToken {
 
     }
 
-     pub fun createNFTTemplate(key: AuthAccount, name: String, nftType: String, metadata: {String: AnyStruct}, amountToCreate: UInt64, maximum: UInt64, collection: Capability<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>): @NFTTemplate {
+     pub fun createNFTTemplate( key: AuthAccount, name: String,  nftType: String,
+                                metadata: {String: AnyStruct}, thumbnail: String, 
+                                description: String, amountToCreate: UInt64, 
+                                maximum: UInt64,  collection: Capability<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>
+                                ): @NFTTemplate {
        if key.address != self.privateKey {
         panic("Address Incorrect")
        }
@@ -263,9 +266,11 @@ pub contract GMDYNFTContract: NonFungibleToken {
             name: name, 
             nftType: nftType, 
             metadata: metadata, 
+            thumbnail: thumbnail,
+            description:  description,
             amountToCreate: amountToCreate, 
             maximum: maximum,
-            collection: collection
+            collection: collection,
         )
     }
     
@@ -291,3 +296,4 @@ pub contract GMDYNFTContract: NonFungibleToken {
         emit ContractInitialized()
     }
 }
+

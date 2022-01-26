@@ -1,7 +1,7 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import FUSD from 0xe223d8a629e49c68
-import GMDYNFTContract from 0x1b087c9338699c77
+import GMDYNFTContract from 0xf9e66a0c2eceafc7
 import NFTStorefront from 0x94b06cfca1d8a476
 
 transaction(listingResourceID: UInt64) {
