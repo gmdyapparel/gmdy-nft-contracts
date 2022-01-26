@@ -61,6 +61,11 @@ pub contract GMDYNFTContract: NonFungibleToken {
             ]
         }
 
+         pub fun getnftType(): String {
+            return self.nftType
+        }
+        
+
         pub fun getMetadata():AnyStruct? {
         return self.metadata
         }
