@@ -1,5 +1,5 @@
 import NonFungibleToken from 0x631e88ae7f1d7c20
-import MetadataViews from 0x23b25112477c90dc
+import MetadataViews from 0xb385c1f831306cc2
 
 pub contract GMDYNFTContract: NonFungibleToken {
 
@@ -99,7 +99,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
         pub fun borrowGMDYNFT(id: UInt64): &GMDYNFTContract.NFT? {
             post {
                 (result == nil) || (result?.id == id):
-                    "Cannot borrow NFT reference: the ID of the returned reference is incorrect"
+                "Cannot borrow NFT reference: the ID of the returned reference is incorrect"
             }
         }
     }
@@ -206,6 +206,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
         pub let nftType : String
         // array NFT
         pub var collectionNFT : [UInt64]
+        pub var counteriDs: [UInt64]
         pub let name : String
         pub let thumbnail:  String
         pub let description: String
@@ -219,6 +220,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
             self.thumbnail = thumbnail
             self.description = description
             self.collectionNFT = []
+            self.counteriDs = []
             self.generateNFT(amount: amountToCreate, collection: collection)
         }
         
@@ -242,16 +244,16 @@ pub contract GMDYNFTContract: NonFungibleToken {
                 let newNFT <- create NFT(id: GMDYNFTContract.totalSupply, name: self.name, metadata: self.metadata, nftType: self.nftType, thumbnail: self.thumbnail, description: self.description)
                 collectionBorrow.deposit(token: <- newNFT)
                 self.collectionNFT.append(GMDYNFTContract.totalSupply)
+                self.counteriDs.append(GMDYNFTContract.totalSupply)
                 i = i + 1
             }
-            let idsNFTminted = collectionBorrow.getIDs()
-            emit TotalsIDs(ids: idsNFTminted)
+            emit TotalsIDs(ids: self.counteriDs)
+            self.counteriDs = []
         }
     
         pub fun getQuantityAvailablesForCreate(): Int {
             return Int(self.maximum) - self.collectionNFT.length
         }
-
     }
 
      pub fun createNFTTemplate( key: AuthAccount, name: String,  nftType: String,
