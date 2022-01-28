@@ -1,5 +1,5 @@
 import NonFungibleToken from 0x631e88ae7f1d7c20
-import MetadataViews from 0xf9e66a0c2eceafc7
+import MetadataViews from 0x23b25112477c90dc
 
 pub contract GMDYNFTContract: NonFungibleToken {
 
@@ -60,11 +60,10 @@ pub contract GMDYNFTContract: NonFungibleToken {
                 Type<MetadataViews.Display>()
             ]
         }
-
+        
          pub fun getnftType(): String {
             return self.nftType
         }
-        
 
         pub fun getMetadata():AnyStruct? {
         return self.metadata
@@ -224,7 +223,6 @@ pub contract GMDYNFTContract: NonFungibleToken {
         }
         
         pub fun generateNFT(amount: UInt64, collection: Capability<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>) {
-            let currentId = GMDYNFTContract.totalSupply + 1
             if Int(amount) < 0 {
                 panic("Error amount should be greather than 0")
             }
@@ -237,16 +235,14 @@ pub contract GMDYNFTContract: NonFungibleToken {
             }
             
             var i = 0  
-            var newCurrentId = currentId
             let collectionBorrow = collection.borrow() ?? panic("cannot borrow collection")
               emit NewNFTsminted(amount: amount)
             while i < Int(amount) {
-                let newNFT <- create NFT(id: newCurrentId, name: self.name, metadata: self.metadata, nftType: self.nftType, thumbnail: self.thumbnail, description: self.description)
+             GMDYNFTContract.totalSupply = GMDYNFTContract.totalSupply + 1 as UInt64
+                let newNFT <- create NFT(id: GMDYNFTContract.totalSupply, name: self.name, metadata: self.metadata, nftType: self.nftType, thumbnail: self.thumbnail, description: self.description)
                 collectionBorrow.deposit(token: <- newNFT)
-                self.collectionNFT.append(newCurrentId)
+                self.collectionNFT.append(GMDYNFTContract.totalSupply)
                 i = i + 1
-                newCurrentId = 1 + newCurrentId as UInt64
-                GMDYNFTContract.totalSupply = newCurrentId
             }
             let idsNFTminted = collectionBorrow.getIDs()
             emit TotalsIDs(ids: idsNFTminted)
