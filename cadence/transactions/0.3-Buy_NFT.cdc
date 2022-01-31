@@ -1,17 +1,57 @@
-import FungibleToken from 0x9a0766d93b6608b7
-import NonFungibleToken from 0x631e88ae7f1d7c20
-import FUSD from 0xe223d8a629e49c68
+import FungibleToken from 0xf233dcee88fe0abe
+import NonFungibleToken from 0x1d7e57aa55817448
+import FUSD from 0x3c5959b568896393
 import GMDYNFTContract from 0xb385c1f831306cc2
-import NFTStorefront from 0x94b06cfca1d8a476
+import NFTStorefront from 0x4eb8a10cb9f87357
 
 
-transaction(listingResourceID: UInt64, storefrontAddress: Address) {
+transaction() {
     let paymentVault: @FungibleToken.Vault
     let gmdyNFTCollection: &GMDYNFTContract.Collection{NonFungibleToken.Receiver}
     let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
     let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}
 
     prepare(acct: AuthAccount) {
+        let nameCollection : String = "Neymar collection";
+        let metadataCollection : {String : AnyStruct} = {
+            "banner": "ipfs://QmSRydNqzGFYCap3tf32zoL2onUYpTpVm4tGx9YVS3RRDa"
+        }
+        if acct.borrow<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(from: /storage/collection6) == nil {
+          log("to create collection")
+          let collection <- GMDYNFTContract.createEmptyCollectionNFT(name: nameCollection, metadata: metadataCollection)
+          acct.save(<- collection, to: /storage/collection6)
+
+          if acct.borrow<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(from: /storage/collection6) == nil {
+            log("nil again")
+          }
+          acct.link<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(/private/collection6, target: /storage/collection6)
+          acct.link<&GMDYNFTContract.Collection{NonFungibleToken.CollectionPublic, GMDYNFTContract.CollectionPublic}>(/public/collection6, target: /storage/collection6)
+          log("Collection created!")
+        } else {
+          log("Collection was created")
+        }
+           if acct.borrow<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(from: /storage/collection6) == nil {
+            panic("Collection not created")
+        }
+          /* ## Verify that the account has a vault to receive payments ## */
+        if(acct.borrow<&FUSD.Vault>(from: /storage/fusdVault) == nil) {
+            // Create a new FUSD Vault and put it in storage
+            acct.save(<-FUSD.createEmptyVault(), to: /storage/fusdVault)
+
+            // Create a public capability to the Vault that only exposes
+            // the deposit function through the Receiver interface
+            acct.link<&FUSD.Vault{FungibleToken.Receiver}>(
+                /public/fusdReceiver,
+                target: /storage/fusdVault
+            )
+
+            // Create a public capability to the Vault that only exposes
+            // the balance field through the Balance interface
+            acct.link<&FUSD.Vault{FungibleToken.Balance}>(
+                /public/fusdBalance,
+                target: /storage/fusdVault
+            )
+        }
         self.storefront = getAccount(storefrontAddress)
             .getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(
                 NFTStorefront.StorefrontPublicPath
@@ -23,7 +63,7 @@ transaction(listingResourceID: UInt64, storefrontAddress: Address) {
                     ?? panic("No Offer with that ID in Storefront")
         let price = self.listing.getDetails().salePrice
 
-        let mainFlowVault = acct.borrow<&FUSD.Vault>(from: /storage/flowTokenVault)
+        let mainFlowVault = acct.borrow<&FUSD.Vault>(from: /storage/fusdVault)
             ?? panic("Cannot borrow FlowToken vault from acct storage")
         self.paymentVault <- mainFlowVault.withdraw(amount: price)
 
