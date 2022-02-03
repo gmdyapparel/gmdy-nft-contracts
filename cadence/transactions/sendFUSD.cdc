@@ -5,7 +5,6 @@ import GMDYNFTContract from 0xb385c1f831306cc2
 import NFTStorefront from 0x4eb8a10cb9f87357
 
 
-
 /* Transaction to send FUSD to another account simply for testing purposes*/
 transaction(recipient: Address) {
 
