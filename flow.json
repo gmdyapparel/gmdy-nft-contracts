@@ -18,9 +18,9 @@
 			"address": "f8d6e0586b0a20c7",
 			"key": "de2b8dc28e07d5c031e038431bdee1a10d5e745c71f505175972caf1e959ba63"
 		},
-		"gmdy-testnet": {
-			"address": "0x6c4bbae808f9ced9",
-			"key": "6f44732398a01588eefdfb5bee1c80a3687494b01e78c84c213abfd678643e37"
+		"GMDYTestnet-dev": {
+			"address": "0xbf53596ef8f4926c",
+			"key": "07bd7249b85a8d32033a4547b077a0c04c5708d47845a17fe8e9aafb83d87428"
 		},
 		"buyer-testnet": {
 			"address": "0x7a1fdfdb91fdc4b8",
@@ -29,7 +29,7 @@
 	},
 	"deployments": {
 		"testnet": {
-			"gmdy-testnet": [
+			"GMDYTestnet-dev": [
 				"GMDYNFTContract"
 			]
 		}

@@ -1,5 +1,5 @@
-import NonFungibleToken from 0x1d7e57aa55817448
-import MetadataViews from 0x1d7e57aa55817448
+import NonFungibleToken from 0x631e88ae7f1d7c20
+import MetadataViews from 0x631e88ae7f1d7c20
 
 pub contract GMDYNFTContract: NonFungibleToken {
 
@@ -8,6 +8,12 @@ pub contract GMDYNFTContract: NonFungibleToken {
 
     //variable that stores the account address that created the contract
     pub let privateKey: Address
+
+    //link public of the collection
+    pub let CollectionPublicPath : PublicPath
+
+    //storagre of the collection
+    pub let CollectionStoragePath : StoragePath
 
     //total collection created
     pub var totalCollection: UInt64
@@ -95,7 +101,6 @@ pub contract GMDYNFTContract: NonFungibleToken {
         pub fun idExists(id: UInt64): Bool
         pub fun getRefNFT(id: UInt64): &NonFungibleToken.NFT
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT
         pub fun borrowGMDYNFT(id: UInt64): &GMDYNFTContract.NFT? {
             post {
                 (result == nil) || (result?.id == id):
@@ -109,9 +114,9 @@ pub contract GMDYNFTContract: NonFungibleToken {
     pub resource Collection: CollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
 
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
-        pub var metadata: {String: AnyStruct}
+        pub var metadata: {String: AnyStruct}?
 
-        pub var name: String
+        pub var name: String?
 
         init (name: String, metadata: {String: AnyStruct}) {
             self.ownedNFTs <- {}
@@ -147,10 +152,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
         }
 
         //fun get IDs nft
-        pub fun getIDs(): [UInt64] {
-
-            emit TotalsIDs(ids: self.ownedNFTs.keys)
-            
+        pub fun getIDs(): [UInt64] {            
             return self.ownedNFTs.keys
         }
 
@@ -184,7 +186,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
          pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
             let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
             let gmdyNFT = nft as! &GMDYNFTContract.NFT
-            return gmdyNFT as &AnyResource{MetadataViews.Resolver}
+            return gmdyNFT 
         }
 
         destroy () {
@@ -240,7 +242,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
             let collectionBorrow = collection.borrow() ?? panic("cannot borrow collection")
               emit NewNFTsminted(amount: amount)
             while i < Int(amount) {
-             GMDYNFTContract.totalSupply = GMDYNFTContract.totalSupply + 1 as UInt64
+             GMDYNFTContract.totalSupply = GMDYNFTContract.totalSupply + 1 
                 let newNFT <- create NFT(id: GMDYNFTContract.totalSupply, name: self.name, metadata: self.metadata, nftType: self.nftType, thumbnail: self.thumbnail, description: self.description)
                 collectionBorrow.deposit(token: <- newNFT)
                 self.collectionNFT.append(GMDYNFTContract.totalSupply)
@@ -278,6 +280,8 @@ pub contract GMDYNFTContract: NonFungibleToken {
     }
     
     pub fun createEmptyCollection(): @NonFungibleToken.Collection {
+        var newID = GMDYNFTContract.totalCollection + 1
+        GMDYNFTContract.totalCollection = newID
         return <- create Collection(name: "", metadata: {})
     }
 
@@ -296,7 +300,9 @@ pub contract GMDYNFTContract: NonFungibleToken {
         // Initialize the total collection
         self.totalCollection = 0
 
+        self.CollectionPublicPath = /public/GMDYNFTCollectionPublic
+        self.CollectionStoragePath = /storage/GMDYNFTCollection
+
         emit ContractInitialized()
     }
 }
-
