@@ -7,32 +7,42 @@ import NFTStorefront from 0x94b06cfca1d8a476
   /* ## This transaction creates a collection ## */
 transaction {
 
+  let publicPath: PublicPath
+  let storagePath : StoragePath
+  let privatePath: PrivatePath
+
   prepare(acct: AuthAccount) {
 
-    //The account must be Experia View
-    let nameCollection : String = "GMDY collection 1";
+    self.storagePath = /storage/collection2
+    self.publicPath = /public/collection2
+    self.privatePath = /private/collection2
+
+
+    //The account must be gmdy
+    let nameCollection : String = "Neymar collection";
     let metadataCollection : {String : AnyStruct} = {
-      "banner": "https://gateway.pinata.cloud/ipfs/bafybeibuqzhuoj6ychlckjn6cgfb5zfurggs2x7pvvzjtdcmvizu2fg6ga"
+      "banner": "ipfs://QmSRydNqzGFYCap3tf32zoL2onUYpTpVm4tGx9YVS3RRDa"
     }
-
-    let providerStorage = /storage/collection12
-    let providerPrivate = /private/collection12
-
-        if acct.borrow<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(from: providerStorage) == nil {
+        if acct.borrow<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(from: self.storagePath) == nil {
           let collection <- GMDYNFTContract.createEmptyCollectionNFT(name: nameCollection, metadata: metadataCollection)
-          acct.save(<- collection, to: providerStorage)
+          acct.save(<- collection, to: self.storagePath)
 
-          if acct.borrow<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(from: providerStorage) == nil {
-            log("nil again")
+          if acct.borrow<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(from: self.storagePath) == nil {
+            panic("Error to create collection")
           }
-          acct.link<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(providerPrivate, target: providerStorage)
-           acct.link<&GMDYNFTContract.Collection{NonFungibleToken.CollectionPublic, GMDYNFTContract.CollectionPublic}>(GMDYNFTContract.CollectionPublicPath, target: providerStorage)
+          acct.link<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(self.privatePath, target: self.storagePath)
+          acct.link<&GMDYNFTContract.Collection{NonFungibleToken.CollectionPublic, GMDYNFTContract.CollectionPublic}>(self.publicPath, target: self.storagePath)
+          log("Collection created!")
         } else {
           panic("Collection was created")
         }
   }
 
   execute {
-   log("Collection Created Succes")
+    let acct = getAccount(0x02)
+    // create a public capability for the collection
+    if acct.getCapability<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>(self.publicPath) == nil {
+      log("nill collection")
+    }
   }
 }

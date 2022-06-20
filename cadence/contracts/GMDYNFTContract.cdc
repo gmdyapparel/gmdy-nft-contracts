@@ -99,7 +99,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
         pub fun deposit(token: @NonFungibleToken.NFT)
         pub fun getIDs(): [UInt64]
         pub fun idExists(id: UInt64): Bool
-        pub fun getRefNFT(id: UInt64): &NonFungibleToken.NFT
+        pub fun getRefNFT(id: UInt64): &NonFungibleToken.NFT?
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
         pub fun borrowGMDYNFT(id: UInt64): &GMDYNFTContract.NFT? {
             post {
@@ -157,25 +157,19 @@ pub contract GMDYNFTContract: NonFungibleToken {
         }
 
         /*Function get Ref NFT*/
-        pub fun getRefNFT(id: UInt64): &NonFungibleToken.NFT {
-            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+        pub fun getRefNFT(id: UInt64): &NonFungibleToken.NFT? {
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
         /*Function borrow NFT*/
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            if self.ownedNFTs[id] != nil {
-                return &self.ownedNFTs[id] as &NonFungibleToken.NFT     
-            }
-            panic("not found NFT")
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!  
         }
 
+         /*Function borrow GMDY NFT*/
         pub fun borrowGMDYNFT(id: UInt64): &GMDYNFTContract.NFT? {
-            if self.ownedNFTs[id] != nil {
-                // Create an authorized reference to allow downcasting
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &GMDYNFTContract.NFT
-            }
-          panic("not found NFT")
+                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+                return ref as! &GMDYNFTContract.NFT?
         }
 
         // fun to check if the NFT exists
@@ -184,7 +178,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
         }
         
          pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
-            let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+            let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
             let gmdyNFT = nft as! &GMDYNFTContract.NFT
             return gmdyNFT 
         }
@@ -214,7 +208,7 @@ pub contract GMDYNFTContract: NonFungibleToken {
         pub let description: String
         pub let maximum : UInt64
  
-        init(name: String, nftType: String, metadata: {String: AnyStruct}, thumbnail: String, description: String, amountToCreate: UInt64, maximum: UInt64 collection: Capability<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>) { 
+        init(name: String, nftType: String, metadata: {String: AnyStruct}, thumbnail: String, description: String, amountToCreate: UInt64, maximum: UInt64, collection: Capability<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>) { 
             self.metadata = metadata
             self.name = name
             self.nftType = nftType
@@ -261,7 +255,8 @@ pub contract GMDYNFTContract: NonFungibleToken {
      pub fun createNFTTemplate( key: AuthAccount, name: String,  nftType: String,
                                 metadata: {String: AnyStruct}, thumbnail: String, 
                                 description: String, amountToCreate: UInt64, 
-                                maximum: UInt64,  collection: Capability<&GMDYNFTContract.Collection{NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>
+                                maximum: UInt64, collection: Capability<&GMDYNFTContract.Collection{NonFungibleToken.Provider, 
+                                NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic}>
                                 ): @NFTTemplate {
        if key.address != self.privateKey {
         panic("Address Incorrect")

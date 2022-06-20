@@ -44,7 +44,7 @@ import DayNFT from 0x0b7f00d13cd033bd
 import NFTContract from 0xed15722048e03cea
 import GogoroCollectible from 0x5fc35f03a6f33561
 import YahooCollectible from 0x5d50ce3fd080edce
-import GMDYNFTContract from 0xbf53596ef8f4926c
+import GMDYNFTContract from 0xfde2900253c7afaa
 
 pub struct NFTCollection {
     pub let owner: Address
@@ -1804,12 +1804,12 @@ pub fun getYahooCollectibleNFT(owner: PublicAccount, id: UInt64): NFTData? {
         }
     )
 }
-//https://flow-view-source.com/testnet/account/0x892da5143035a933/contract/GMDYNFTContract
+//https://flow-view-source.com/testnet/account/0x954d4ec3c132fc9a/contract/GMDYNFTContract
 pub fun getGMDYNFTContract(owner: PublicAccount, id: UInt64): NFTData? {
 
     let contract = NFTContract(
         name: "GMDYNFTContract",
-        address: 0xbf53596ef8f4926c,
+        address: 0x954d4ec3c132fc9a,
         storage_path: "GMDYNFTContract.CollectionStoragePath",
         public_path: "GMDYNFTContract.CollectionPublicPath",
         public_collection_name: "GMDYNFTContract.CollectionPublic",
@@ -1817,7 +1817,7 @@ pub fun getGMDYNFTContract(owner: PublicAccount, id: UInt64): NFTData? {
     )
 
     let col = owner.getCapability(GMDYNFTContract.CollectionPublicPath)
-        .borrow<&{GMDYNFTContract.CollectionPublic}>()
+        .borrow<&AnyResource{GMDYNFTContract.CollectionPublic}>()
     if col == nil { return nil }
 
     let nft = col!.borrowGMDYNFT(id: id)
@@ -1825,8 +1825,9 @@ pub fun getGMDYNFTContract(owner: PublicAccount, id: UInt64): NFTData? {
 
     let view = nft!.resolveView(Type<MetadataViews.Display>())!
 
-    let metadata = nft!.getMetadata()
-    let nftType = nft!.getType()
+    let metadata = nft.getMetadata()
+    let nftTypeCollection = nft.getnftType()
+    let nftType = nft.getType()
 
     let display = view as! MetadataViews.Display
 
@@ -1842,7 +1843,7 @@ pub fun getGMDYNFTContract(owner: PublicAccount, id: UInt64): NFTData? {
             NFTMedia(uri: display.thumbnail.uri(), mimetype: nftType.identifier)
         ],
         metadata: {
-            "collectionType": nft!.getnftType()
+            "collectionType": metadata
           
         }
     )
